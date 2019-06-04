@@ -32,7 +32,7 @@ def save_prime(number):
             time.sleep(0.5)
 
 def get_prime():
-    retrues = 5
+    retries = 5
     while True:
         try:
             return cache.lrange('primelist', 0, -1)
@@ -41,16 +41,23 @@ def get_prime():
                 raise exc
             retries -= 1
             time.sleep(0.5)
+
+def check_prime(number):
+    num = int(number)
+    for i in range(2, num):
+        if(num % i == 0):
+            return False
+    return True
+    		
             
 @app.route('/isPrime/<number>')
 def isPrime(number):
     num = int(number)
-    for i in range(2, num):
-        if(num % i == 0):
-            return '{} is not prime\n'.format(num)
-
-    save_prime(num)
-    return '{} is prime\n'.format(num)
+    if(check_prime(num) == False):
+        return '{} is not prime\n'.format(num)
+    else:
+	save_prime(num)
+        return '{} is prime\n'.format(num)
     
 @app.route('/primesStored')
 def primesStored():
@@ -63,7 +70,3 @@ def hello():
     count = get_hit_count()
     return 'Hello World! I have been seen {} times.\n'.format(count)
 
-@app.route('/deletekey')
-def deletekey():
-    cache.delete('primelist')
-    return 'Key Deleted \n'
