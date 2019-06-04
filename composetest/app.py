@@ -46,10 +46,12 @@ def check_prime(number):
     for i in range(2, num):
         if(num % i == 0):
             return False
+    if(num == 1):
+        return False
     return True
 
 def run_tests():
-    if(test_one() == True and test_two() == True and test_three() == True and test_four() == True and test_five() == True):
+    if(test_one() == True and test_two() == True and test_three() == True and test_four() == True and test_five() == True and test_six() == True):
         print()
         return 'TESTS PASSED!'
     return 'TESTS FAILED!'
@@ -80,6 +82,11 @@ def test_five():
     if(num == b'67'):
         return True
     return False
+
+def test_six():
+    if(check_prime(6878) == False):
+        return True
+    return False
 		            
 @app.route('/isPrime/<number>')
 def isPrime(number):
@@ -105,4 +112,10 @@ def hello():
 def tests():
     result = run_tests()		     	
     return '{}\n'.format(result)
+
+
+
+
+
+
 
