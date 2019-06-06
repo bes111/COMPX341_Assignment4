@@ -22,6 +22,8 @@ def save_prime(number):
     retries = 5
     while True:
         try:
+            if(in_list(num) == True):
+                return
             cache.lpush('primelist',num)
             return
         except redis.exceptions.ConnectionError as exc:
@@ -30,11 +32,28 @@ def save_prime(number):
             retries -= 1
             time.sleep(0.5)
 
+def convert_to_byte(bytearray):
+    intarray = []
+    for i in bytearray:
+        intarray.append(int(i))
+    return intarray
+
+def in_list(number):
+    num = number
+    bytearray = cache.lrange('primelist', 0, -1)
+    intarray = convert_to_byte(bytearray)
+    for i in intarray:
+        if(num == i):
+            return True
+    return False
+    
+
 def get_prime():
     retries = 5
     while True:
         try:
-            return cache.lrange('primelist', 0, -1)
+            bytearray = cache.lrange('primelist', 0, -1)            
+            return convert_to_byte(bytearray)
         except redis.exceptions.ConnectionError as exc:
             if retries == 0:
                 raise exc
@@ -42,16 +61,23 @@ def get_prime():
             time.sleep(0.5)
 
 def check_prime(number):
+#https://stackoverflow.com/questions/46841968/fastest-way-of-testing-if-a-number-is-prime-with-python Was very helpful for speeding up the prime number checker Code was adapted from this website to help create prime number checker. Code is very similar except boolean was returned  
     num = int(number)
-    for i in range(2, num):
-        if(num % i == 0):
-            return False
     if(num == 1):
         return False
+    if(num == 2):
+        return True
+    if(num & 1 == 0):
+        return False
+    divisor = 3
+    while divisor * divisor <= num:
+        if(num % divisor == 0):
+            return False
+        divisor = divisor + 2
     return True
 
 def run_tests():
-    if(test_one() == True and test_two() == True and test_three() == True and test_four() == True and test_five() == True and test_six() == True):
+    if(test_one() == True and test_two() == True and test_three() == True and test_four() == True and test_five() == True and test_six() == True ):
         print()
         return 'TESTS PASSED!'
     return 'TESTS FAILED!'
@@ -77,14 +103,14 @@ def test_four():
     return False
 
 def test_five():
-    save_prime(67)
-    num = cache.lpop('primelist') 
-    if(num == b'67'):
+    if(check_prime(6878) == False):
         return True
     return False
 
 def test_six():
-    if(check_prime(6878) == False):
+    save_prime(67)
+    if(in_list(67) == True):
+        num = cache.lpop('primelist') 
         return True
     return False
 		            
@@ -112,6 +138,7 @@ def hello():
 def tests():
     result = run_tests()		     	
     return '{}\n'.format(result)
+
 
 
 
